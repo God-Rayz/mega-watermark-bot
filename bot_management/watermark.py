@@ -5,6 +5,7 @@ from bot_management.mega.mega import MEGA
 from bot_management.leakutopia_links import newPaste
 from bot_management.extractor import extract_folder_size
 from bot_management.utils import split_large_folders_and_optimize_allocation
+from bot_management.license_checker import license_checker
 
 async def run_single_folder_watermarking(mega, mega_link, model_name, multiple_models, call, folder_size):
     """
@@ -20,6 +21,12 @@ async def run_single_folder_watermarking(mega, mega_link, model_name, multiple_m
     Returns:
         str: The public link if the process is successful, or False if any step fails.
     """
+    # Check license limits
+    can_watermark, message = license_checker.check_watermark_limit()
+    if not can_watermark:
+        await call.message.reply(f"🚫 **LIMITED VERSION RESTRICTION**\n\n{message}\n\n💡 **Upgrade to Full Version:**\n- Unlimited daily watermarks\n- Advanced features\n- Priority support\n\nContact developer for licensing information.")
+        return False
+    
     print(multiple_models)
     if not mega.server_status:
         await call.message.reply("❌ MEGAcmdServer not running correctly.\n\nPlease (re)start it.")
@@ -97,6 +104,9 @@ async def run_single_folder_watermarking(mega, mega_link, model_name, multiple_m
     # Get the public link.
     public_link = mega.get_public_link(renamed_folder)
     await call.message.reply(f"✅ <b>Process Completed:</b> {public_link}")
+    
+    # Increment usage counter
+    license_checker.increment_watermark()
 
     return public_link
 
@@ -122,6 +132,19 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
     Returns:
         tuple: (watermarking_log, final_account_allocations, final_unallocated_folders)
     """
+    # Check bulk processing limits
+    can_process, message = license_checker.check_bulk_process_limit()
+    if not can_process:
+        await call.message.reply(f"🚫 **LIMITED VERSION RESTRICTION**\n\n{message}\n\n💡 **Upgrade to Full Version:**\n- Unlimited bulk processing\n- Advanced automation\n- Priority support\n\nContact developer for licensing information.")
+        return {}, {}, {}
+    
+    # Check file count limits
+    total_files = len(folder_names)
+    can_process_files, file_message = license_checker.check_file_limit(total_files)
+    if not can_process_files:
+        await call.message.reply(f"🚫 **LIMITED VERSION RESTRICTION**\n\n{file_message}\n\n💡 **Upgrade to Full Version:**\n- Unlimited file processing\n- Advanced features\n- Priority support\n\nContact developer for licensing information.")
+        return {}, {}, {}
+    
     watermarking_log = {}
 
     # Process non-mega links as before.
@@ -532,5 +555,9 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
         json.dump(allocation_mapping, f, indent=4)
 
     await call.message.reply_text("✅ Watermarking process completed. Logs saved.")
+    
+    # Increment usage counters
+    license_checker.increment_bulk_process()
+    license_checker.increment_files(total_files)
 
     return watermarking_log, final_account_allocations, final_unallocated_folders

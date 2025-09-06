@@ -10,6 +10,7 @@ import os
 import json
 import hashlib
 from bot_management.leakutopia_links import extract_mega_from_leakutopia_headless
+from bot_management.license_checker import license_checker
 
 # Global cache for extra links from leakutopia.click (keyed by chat_id+mega_link hash)
 leakutopia_extra_cache = {}
@@ -385,3 +386,44 @@ async def handle_mega_link(client, message):
 
         except asyncio.TimeoutError:
             await message.reply("⌛ Time is finished")
+
+@app.on_message(filters.command("usage") & filters.user(authorized_users))
+async def check_usage_status(client, message):
+    """Check current usage status and limits"""
+    license_checker.reset_daily_limits()
+    
+    status_text = f"""
+📊 **Usage Status Report**
+
+🔹 **License Type:** {license_checker.limits['license_type'].upper()}
+🔹 **Daily Watermarks:** {license_checker.limits['daily_watermarks']}/{license_checker.limits['max_daily_watermarks']}
+🔹 **Daily Bulk Processes:** {license_checker.limits['bulk_processes']}/{license_checker.limits['max_bulk_processes']}
+🔹 **Total Files Processed:** {license_checker.limits['total_files_processed']}/{license_checker.limits['max_total_files']}
+
+"""
+    
+    if license_checker.limits['license_type'] == 'free':
+        status_text += """
+🚫 **LIMITED VERSION**
+- Daily watermark limit: 10
+- Daily bulk process limit: 2  
+- Total file limit: 100
+
+💡 **Upgrade to Full Version:**
+- Unlimited watermarks
+- Unlimited bulk processing
+- Unlimited files
+- Advanced features
+- Priority support
+
+Contact developer for licensing information.
+"""
+    else:
+        status_text += """
+✅ **FULL VERSION**
+- Unlimited usage
+- All features enabled
+- Priority support
+"""
+    
+    await message.reply(status_text)

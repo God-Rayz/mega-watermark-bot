@@ -2,6 +2,7 @@
 config.ini
 credentials.txt
 new_accounts.txt
+usage_limits.json
 
 # Logs
 *.log
