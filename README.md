@@ -1,15 +1,31 @@
-# Telegram Watermark Bot
+# Mega Watermark Bot
 
 A Telegram bot for automatically watermarking content with customizable branding and managing bulk processing operations.
 
-## Features
+## ⚠️ LIMITED VERSION NOTICE
 
-- **Automatic Watermarking**: Adds watermarks to images and videos
-- **Bulk Processing**: Handles large batches of content efficiently
-- **Mega Integration**: Works with MEGA file storage
-- **Account Management**: Automated account creation and management
-- **Custom Branding**: Configurable watermark text and styling
-- **File Organization**: Automatic file categorization and cleanup
+This repository contains a **limited version** of the Mega Watermark Bot. Some advanced features and full functionality are restricted in this public release.
+
+**For the complete, full-featured version with all advanced capabilities, please contact the developer for licensing information.**
+
+## Features (Limited Version)
+
+- **Basic Watermarking**: Adds watermarks to images and videos *(limited functionality)*
+- **Basic Processing**: Handles content processing *(reduced capabilities)*
+- **Mega Integration**: Works with MEGA file storage *(basic features only)*
+- **Account Management**: Basic account operations *(limited automation)*
+- **Custom Branding**: Configurable watermark text and styling *(restricted options)*
+- **File Organization**: Basic file categorization *(simplified version)*
+
+### 🔒 Full Version Features (Available via License)
+
+- **Advanced Bulk Processing**: Unlimited batch processing with optimization
+- **Complete Account Automation**: Full automated account creation and management
+- **Premium Watermarking**: Advanced watermarking with custom positioning and effects
+- **Advanced Mega Integration**: Full MEGA API integration with bulk operations
+- **Custom Branding Suite**: Complete branding customization options
+- **Priority Support**: Direct developer support and updates
+- **Commercial License**: Full commercial usage rights
 
 ## Setup
 
@@ -101,6 +117,29 @@ These files are automatically excluded via `.gitignore`.
 
 This project is for educational purposes. Please ensure compliance with Telegram's Terms of Service and applicable laws in your jurisdiction.
 
+## 💰 Licensing & Full Version
+
+This public repository contains a **limited version** of the Mega Watermark Bot. 
+
+### Get the Full Version
+
+For the complete, unrestricted version with all features:
+
+- **Contact**: Reach out to the developer for licensing information
+- **Features**: Full automation, advanced watermarking, unlimited processing
+- **Support**: Priority support and regular updates
+- **Commercial Use**: Full commercial licensing available
+
+### Limited Version Restrictions
+
+- Reduced processing capabilities
+- Limited automation features
+- Basic watermarking options only
+- No commercial usage rights
+- Community support only
+
 ## Support
 
-For issues and questions, please open an issue on GitHub.
+For issues with the limited version, please open an issue on GitHub.
+
+For full version inquiries and licensing, please contact the developer directly.
