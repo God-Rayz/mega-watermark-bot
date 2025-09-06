@@ -39,8 +39,8 @@ This repository contains a **limited version** of the Mega Watermark Bot. Some a
 
 1. Clone the repository:
 ```bash
-git clone <your-repo-url>
-cd Leakifyhub-copy
+git clone https://github.com/God-Rayz/mega-watermark-bot.git
+cd mega-watermark-bot
 ```
 
 2. Install dependencies:
