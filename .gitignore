@@ -1,0 +1,44 @@
+# Sensitive configuration files
+config.ini
+credentials.txt
+new_accounts.txt
+usage_limits.json
+
+# Logs
+*.log
+logs/
+bot_management/logs/
+bot_management/mega/logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bulk process data
+bulk_process/
+bulk_processes/
+downloads/
+uploads/
+
+# Temporary files
+*.tmp
+*.temp
