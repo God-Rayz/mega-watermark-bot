@@ -1,0 +1,24 @@
+{
+    "https://mega.nz/folder/RQh1EIbD#GS7ahouBiOBQR-aOmcaYAw_chunk_1": {
+        "account": "test-ca30b0fe69cd2824@powerscrews.com",
+        "size": 19.88,
+        "model_name": "SecretTherapy",
+        "status": "success",
+        "public_link": "https://mega.nz/folder/qJNEBYSL#Wn9ScLCMzLDWfe6D3uYf0Q",
+        "error": null,
+        "original_folder": "https://mega.nz/folder/RQh1EIbD#GS7ahouBiOBQR-aOmcaYAw",
+        "chunk_number": 1,
+        "is_chunk": true
+    },
+    "https://mega.nz/folder/RQh1EIbD#GS7ahouBiOBQR-aOmcaYAw_chunk_2": {
+        "account": "test-19768db89f25130d@powerscrews.com",
+        "size": 0.00892578125,
+        "model_name": "SecretTherapy",
+        "status": "success",
+        "public_link": "https://mega.nz/folder/KLQEBJIY#jcVp0A0rll5NEG0fO-bBUg",
+        "error": null,
+        "original_folder": "https://mega.nz/folder/RQh1EIbD#GS7ahouBiOBQR-aOmcaYAw",
+        "chunk_number": 2,
+        "is_chunk": true
+    }
+}

@@ -1,0 +1,195 @@
+{
+    "account_allocations": {
+        "test-a7dba5ca9b894ca0@powerscrews.com": [
+            [
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1",
+                19.9,
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                {
+                    "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                    "total_size": 54.15,
+                    "num_accounts": 3,
+                    "accounts_needed": 3,
+                    "chunks": [
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1",
+                            "size": 19.9,
+                            "account_index": 0,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2",
+                            "size": 19.9,
+                            "account_index": 1,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3",
+                            "size": 14.350000000000001,
+                            "account_index": 2,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        }
+                    ]
+                },
+                0
+            ]
+        ],
+        "test-4537f0d40909662c@powerscrews.com": [
+            [
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2",
+                19.9,
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                {
+                    "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                    "total_size": 54.15,
+                    "num_accounts": 3,
+                    "accounts_needed": 3,
+                    "chunks": [
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1",
+                            "size": 19.9,
+                            "account_index": 0,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2",
+                            "size": 19.9,
+                            "account_index": 1,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3",
+                            "size": 14.350000000000001,
+                            "account_index": 2,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        }
+                    ]
+                },
+                1
+            ]
+        ],
+        "test-e4bc0f7c296dee2f@powerscrews.com": [
+            [
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3",
+                14.350000000000001,
+                "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                {
+                    "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+                    "total_size": 54.15,
+                    "num_accounts": 3,
+                    "accounts_needed": 3,
+                    "chunks": [
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1",
+                            "size": 19.9,
+                            "account_index": 0,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2",
+                            "size": 19.9,
+                            "account_index": 1,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        },
+                        {
+                            "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3",
+                            "size": 14.350000000000001,
+                            "account_index": 2,
+                            "content_plan": {
+                                "keep_folders": [],
+                                "delete_folders": [],
+                                "keep_files": [],
+                                "delete_files": []
+                            }
+                        }
+                    ]
+                },
+                2
+            ]
+        ]
+    },
+    "unallocated_folders": [],
+    "chunked_folders": {
+        "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ": {
+            "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+            "total_size": 54.15,
+            "num_accounts": 3,
+            "accounts_needed": 3,
+            "chunks": [
+                {
+                    "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1",
+                    "size": 19.9,
+                    "account_index": 0,
+                    "content_plan": {
+                        "keep_folders": [],
+                        "delete_folders": [],
+                        "keep_files": [],
+                        "delete_files": []
+                    }
+                },
+                {
+                    "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2",
+                    "size": 19.9,
+                    "account_index": 1,
+                    "content_plan": {
+                        "keep_folders": [],
+                        "delete_folders": [],
+                        "keep_files": [],
+                        "delete_files": []
+                    }
+                },
+                {
+                    "chunk_id": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3",
+                    "size": 14.350000000000001,
+                    "account_index": 2,
+                    "content_plan": {
+                        "keep_folders": [],
+                        "delete_folders": [],
+                        "keep_files": [],
+                        "delete_files": []
+                    }
+                }
+            ]
+        }
+    }
+}

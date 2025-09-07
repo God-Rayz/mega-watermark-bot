@@ -1,0 +1,35 @@
+{
+    "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_1": {
+        "account": "test-a7dba5ca9b894ca0@powerscrews.com",
+        "size": 19.92,
+        "model_name": "Martina Smeraldi",
+        "status": "success",
+        "public_link": "https://mega.nz/folder/GQEFwLQC#3wdfY8IX1zGDaFlXdxim-w",
+        "error": null,
+        "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+        "chunk_number": 1,
+        "is_chunk": true
+    },
+    "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_2": {
+        "account": "test-4537f0d40909662c@powerscrews.com",
+        "size": 19.91,
+        "model_name": "Martina Smeraldi",
+        "status": "success",
+        "public_link": "https://mega.nz/folder/zgg3CR4a#by4KKICAGnPQ2R4XTfsFAA",
+        "error": null,
+        "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+        "chunk_number": 2,
+        "is_chunk": true
+    },
+    "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ_chunk_3": {
+        "account": "test-e4bc0f7c296dee2f@powerscrews.com",
+        "size": 14.36,
+        "model_name": "Martina Smeraldi",
+        "status": "success",
+        "public_link": "https://mega.nz/folder/WeYBnCpT#3FWtJBf_pEW-D-U1vusIwA",
+        "error": null,
+        "original_folder": "https://mega.nz/folder/pEIUEYLJ#BG7WfPgdf24R89PWl_AwuQ",
+        "chunk_number": 3,
+        "is_chunk": true
+    }
+}
