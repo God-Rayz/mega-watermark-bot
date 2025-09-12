@@ -493,3 +493,37 @@ def cleanup_processed_content_files():
         print("🧹 No processed content files found to clean up")
     
     return deleted_count
+
+def chunk_text(text, chunk_size=3000):
+    """
+    Split text into chunks of specified size to avoid Telegram's message length limit.
+    
+    Args:
+        text (str): The text to chunk
+        chunk_size (int): Maximum size of each chunk (default: 3000, safe margin below 4096 limit)
+    
+    Yields:
+        str: Text chunks
+    """
+    for i in range(0, len(text), chunk_size):
+        yield text[i:i+chunk_size]
+
+async def send_long_message(call, message_text, header="", chunk_size=3000):
+    """
+    Send a long message in chunks to avoid Telegram's MESSAGE_TOO_LONG error.
+    
+    Args:
+        call: The callback object used for sending messages
+        message_text (str): The message text to send
+        header (str): Optional header to prepend to the first chunk
+        chunk_size (int): Maximum size of each chunk (default: 3000)
+    """
+    full_text = header + message_text
+    chunks = list(chunk_text(full_text, chunk_size))
+    
+    # Send the first chunk (with header)
+    await call.message.reply_text(chunks[0])
+    
+    # Send any additional chunks without header
+    for chunk in chunks[1:]:
+        await call.message.reply_text(chunk)

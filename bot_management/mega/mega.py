@@ -20,7 +20,7 @@ class MEGA:
             log_file_path = os.path.join(os.path.dirname(__file__), 'logs', 'mega_debug.log')
             with open(log_file_path, 'a', encoding='utf-8') as log_file:
                 result = subprocess.run(
-                    command, shell=True, capture_output=True, text=True, timeout=30, encoding='utf-8'
+                    command, shell=True, capture_output=True, text=True, timeout=600, encoding='utf-8'
                 )
                 log_file.write(f"--- COMMAND ---\n{command}\n")
                 log_file.write(f"--- STDOUT ---\n{result.stdout}\n")
@@ -63,8 +63,8 @@ class MEGA:
                 return stderr.strip(), result.returncode
             return stdout.strip(), result.returncode
         except subprocess.TimeoutExpired:
-            print(f"⚠️ Command timed out after 30 seconds: {command}")
-            return "Command timed out after 30 seconds.", 1
+            print(f"⚠️ Command timed out after 10 minutes: {command}")
+            return "Command timed out after 10 minutes.", 1
 
     def run_command(self, command, use_proxy=False):
         """
@@ -1088,14 +1088,7 @@ class MEGA:
                 print(f"❌ CRITICAL: Failed to rename temp folder back to '{folder_path}'. Manual cleanup may be required. Error: {output}")
                 return False
 
-            # 5. Empty the trash to reclaim space immediately.
-            print("🗑️ Emptying trash bin...")
-            trash_command = 'mega-emptytrash' # Corrected command
-            trash_output, trash_returncode = self.run_command(trash_command)
-            if trash_returncode != 0:
-                print(f"⚠️ Warning: Failed to empty trash: {trash_output}")
-            else:
-                print("✅ Trash bin emptied successfully")
+            # 5. Trash will be automatically emptied by MEGA's garbage collection
 
             print("✅ Deletion process completed successfully.")
             return True
@@ -1267,7 +1260,7 @@ class MEGA:
             folder_structure (dict, optional): Pre-analyzed folder structure. Defaults to None.
             
         Returns:
-            tuple: (folder_name, success) if successful, or (False, False) if failed
+            tuple: (folder_name, success, keep_plan) if successful, or (False, False, None) if failed
         """
         await call.message.reply_text(f"🔄 Processing chunk {account_index + 1} of {chunk_plan['original_folder']}")
         
@@ -1275,7 +1268,7 @@ class MEGA:
         folder_name = self.import_mega_link(mega_link)
         if not folder_name:
             await call.message.reply_text("❌ Failed to import mega link")
-            return False, False
+            return False, False, None
         
         folder_name = folder_name.replace("Imported folder complete: ", "").lstrip("/")
         await call.message.reply_text(f"✅ Imported folder: {folder_name}")
@@ -1287,14 +1280,14 @@ class MEGA:
         
         if not folder_structure:
             await call.message.reply_text("❌ Failed to analyze folder structure")
-            return False, False
+            return False, False, None
         
         # Step 3: Calculate what to keep and what to delete
         keep_plan = self.calculate_keep_plan(folder_structure, chunk_plan, account_index)
         
         if not keep_plan:
             await call.message.reply_text("❌ Failed to calculate keep plan")
-            return False, False
+            return False, False, None
         
         # Debug: Show what the keep plan contains
         await call.message.reply_text(f"📊 Keep plan generated: {len(keep_plan['keep_folders'])} folders to keep, {len(keep_plan['delete_folders'])} folders to delete")
@@ -1312,7 +1305,7 @@ class MEGA:
         
         if not deletion_result:
             await call.message.reply_text("❌ Failed to delete unwanted content")
-            return False, False
+            return False, False, None
         
         # Verify deletion by checking folder size again
         await call.message.reply_text("🔍 Verifying deletion...")
@@ -1324,11 +1317,14 @@ class MEGA:
         final_size = self.get_folder_size(folder_name)
         if final_size > 19.9:
             await call.message.reply_text(f"❌ Final size {final_size:.1f}GB exceeds 19.9GB limit")
-            return False, False
+            return False, False, None
         
         await call.message.reply_text(f"✅ Chunk processed successfully. Final size: {final_size:.1f}GB")
         await call.message.reply_text(f"📊 Kept {len(keep_plan['keep_folders'])} folders and {len(keep_plan['keep_files'])} files")
         await call.message.reply_text(f"🗑️ Deleted {len(keep_plan['delete_folders'])} folders and {len(keep_plan['delete_files'])} files")
+        
+        # Add folder structure to keep_plan for reuse in subsequent chunks
+        keep_plan['folder_structure'] = folder_structure
         
         # Return tuple format expected by the calling code
         return (folder_name, True, keep_plan)
@@ -1368,10 +1364,7 @@ class MEGA:
                         else:
                             print(f"❌ FAILED TO DELETE: {file_path} - {delete_output}")
             
-            # Empty trash
-            print("🧪 Emptying trash...")
-            trash_command = 'mega-emptytrash'
-            self.run_command(trash_command)
+            # Trash will be automatically emptied by MEGA's garbage collection
             
             print(f"🧪 FORCE DELETION COMPLETE: Deleted {deleted_count} video files")
             return True

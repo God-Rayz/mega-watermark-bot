@@ -181,7 +181,6 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
             await call.message.reply_text(f"Rebuilt leakutopia link: {new_leak_link}")
 
     # Use the new chunking algorithm to split large folders and optimize allocation
-    print(folder_sizes)
     account_allocations, unallocated_folders, chunked_folders = split_large_folders_and_optimize_allocation(
         accounts, folder_sizes, process_folder
     )
@@ -230,11 +229,14 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
     
     # Display chunking information
     if chunked_folders:
-        chunk_info = "📦 Large folders split into chunks:\n"
+        chunk_info = ""
         for original_folder, chunk_plan_data in chunked_folders.items():
             chunk_info += f"• {original_folder} ({folder_sizes[original_folder]:.1f}GB) → "
             chunk_info += ", ".join([f"{chunk_data['chunk_id']} ({chunk_data['size']:.1f}GB)" for chunk_data in chunk_plan_data['chunks']]) + "\n"
-        await call.message.reply_text(chunk_info)
+        
+        # Use the utility function to send long messages in chunks
+        from bot_management.utils import send_long_message
+        await send_long_message(call, chunk_info, header="📦 Large folders split into chunks:\n")
     
     # Create a mapping from chunks back to original folders for processing
     chunk_to_original = {}
@@ -246,6 +248,12 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
     large_leakutopia_processed_links = {}  # {original_mega_link: [processed_links]}
     large_leakutopia_extra_data = {}       # {original_mega_link: extra_data}
 
+    # Store folder structures for reuse across chunks
+    folder_structures = {}  # {original_folder: folder_structure}
+    
+    # Track failed original folders to skip remaining chunks
+    failed_original_folders = set()  # {original_folder}
+    
     # Process all allocated folders (including chunks)
     for account, allocations in final_account_allocations.items():
         for allocation in allocations:
@@ -258,13 +266,30 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
                 original_folder = None
                 chunk_plan = None
                 account_index = None
+            elif len(allocation) == 4:  # This is a chunk without original_folder
+                folder, size, chunk_plan, account_index = allocation
+                # Find the original folder from chunked_folders
+                original_folder = None
+                if chunk_plan:
+                    original_folder = chunk_plan.get('original_folder')
+                is_chunk = True
             else:
-                continue # Should not happen
+                # Handle unexpected allocation structure gracefully
+                print(f"Warning: Unexpected allocation structure with {len(allocation)} elements: {allocation}")
+                continue
 
             
             # For chunks, we need to process the original mega link but track it as a chunk
             if is_chunk:
                 original_mega_link = original_folder
+                
+                # Check if this original folder has already failed
+                if original_mega_link in failed_original_folders:
+                    await call.message.reply_text(
+                        f"⏭️ Skipping chunk {account_index + 1} of {original_mega_link} - original folder failed"
+                    )
+                    continue
+                
                 await call.message.reply_text(
                     f"🔄 Processing chunk {account_index + 1} of {original_mega_link} ({size:.1f}GB) on account: {account}"
                 )
@@ -341,16 +366,30 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
                     await call.message.reply_text(f"🔧 Using physical chunking for large folder...")
                     await call.message.reply_text(f"📊 Chunk info: size={size:.1f}GB, account_index={account_index}")
                     
+                    # Get or create folder structure for this original folder
+                    if original_folder not in folder_structures:
+                        folder_structures[original_folder] = None  # Will be analyzed on first chunk
+                    
                     result_tuple = await mega.process_large_folder_with_chunking(
-                        processing_link, chunk_plan, account_index, call
+                        processing_link, chunk_plan, account_index, call, folder_structures[original_folder]
                     )
                     
+                    # Store the folder structure after first analysis for reuse
+                    if result_tuple and len(result_tuple) >= 3:
+                        folder_name, success, keep_plan = result_tuple
+                        if success and keep_plan and 'folder_structure' in keep_plan:
+                            folder_structures[original_folder] = keep_plan['folder_structure']
+                    
                     if not result_tuple:
+                        # Mark this original folder as failed to skip remaining chunks
+                        failed_original_folders.add(original_folder)
                         raise Exception("Chunking process failed")
                     
                     chunked_folder_name, success, keep_plan = result_tuple
                     
                     if not success:
+                        # Mark this original folder as failed to skip remaining chunks
+                        failed_original_folders.add(original_folder)
                         raise Exception("Chunking process was not successful")
                     
                     if chunked_folder_name:
@@ -439,6 +478,12 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
                                          folder_sizes[processing_link] and 
                                          folder_sizes[processing_link] > 20)
                     
+                    # Check if this is a chunk of a direct mega.nz link (not leakutopia)
+                    is_chunk_of_direct_mega = (is_chunk and 
+                                             processing_link not in leak_mapping and 
+                                             original_folder and 
+                                             original_folder not in leak_mapping)
+                    
                     if is_large_leakutopia:
                         # For large leakutopia folders, collect the processed link but don't create the leakutopia link yet
                         if processing_link not in large_leakutopia_processed_links:
@@ -451,6 +496,12 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
                         watermarking_log[log_key]["pending_leakutopia"] = True
                         
                         await call.message.reply_text(f"📦 Collected processed link for large leakutopia folder: {result}")
+                    elif is_chunk_of_direct_mega:
+                        # For chunks of direct mega.nz links, mark as pending leakutopia creation
+                        watermarking_log[log_key]["public_link"] = result
+                        watermarking_log[log_key]["pending_leakutopia"] = True
+                        
+                        await call.message.reply_text(f"📦 Collected processed link for chunked mega folder: {result}")
                     else:
                         # For regular folders or small leakutopia folders, rebuild leakutopia link as before
                         if processing_link in leak_mapping:
@@ -492,6 +543,10 @@ async def run_bulk_watermarking(process_folder, call, folder_names, leak_mapping
                     watermarking_log[log_key]["status"] = "failed"
                     watermarking_log[log_key]["error"] = "Process returned False"
             except Exception as e:
+                # If this is a chunk and the error is related to chunking failure, mark the original folder as failed
+                if is_chunk and ("Chunking process" in str(e) or "chunking" in str(e).lower()):
+                    failed_original_folders.add(original_folder)
+                
                 watermarking_log[log_key]["status"] = "failed"
                 watermarking_log[log_key]["error"] = str(e)
                 await call.message.reply_text(f"❌ Watermarking error for folder {processing_link}: {e}")

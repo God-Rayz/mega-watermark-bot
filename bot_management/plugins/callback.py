@@ -102,7 +102,7 @@ After you set your credentials, send a MEGA link 🔗"""
             json.dump({}, f)
 
         try:
-            delete = await app.listen.Cancel(str(message.chat.id))
+            delete = await app.listen.Cancel(str(call.message.chat.id))
         except Exception as e:
             pass
 
@@ -190,21 +190,14 @@ After you set your credentials, send a MEGA link 🔗"""
                 await call.message.reply_text(alert_message)
                 return
 
-            # Build the top message with only valid emails
+            # Build the message with only valid emails
             top_message = f"Successfully processed {len(valid_emails)} valid emails:\n\n"
 
             # Format each email as a code block
             formatted_emails = "\n".join(f"<code>{email}</code>" for email in valid_emails)
 
-            # Combine both parts
-            final_message = top_message + formatted_emails
-
-            # Telegram's maximum message length is 4096 characters
-            max_length = 4096
-            if len(final_message) > max_length:
-                final_message = final_message[:max_length - 30] + "\n<code>...truncated...</code>"
-
-            await call.message.reply_text(final_message)
+            # Use the utility function to send long messages in chunks
+            await send_long_message(call, formatted_emails, header=top_message)
 
             # Prompt the user to upload a text file with MEGA links (one per line)
             mega_prompt = "Now, please upload a text file containing a list of MEGA links (one per line) within 10 minutes."
@@ -255,21 +248,14 @@ After you set your credentials, send a MEGA link 🔗"""
 
                 mega_links = valid_mega_links
 
-                # Build a top message for MEGA links
+                # Build a message for MEGA links
                 top_message_links = f"Successfully processed {len(mega_links)} MEGA links:\n\n"
 
                 # Format each link as an ordered list item
                 formatted_links = "\n".join(f"{i+1}. <code>{link}</code>" for i, link in enumerate(mega_links))
 
-                # Combine both parts
-                final_message_links = top_message_links + formatted_links
-
-                # Trim the message if it exceeds Telegram's limit
-                max_length = 4096
-                if len(final_message_links) > max_length:
-                    final_message_links = final_message_links[:max_length - 30] + "\n<code>...truncated...</code>"
-
-                await call.message.reply_text(final_message_links)
+                # Use the utility function to send long messages in chunks
+                await send_long_message(call, formatted_links, header=top_message_links)
 
                 # Prompt the user to upload a text file with names (one per line)
                 names_prompt = "Now, please upload a text file containing a list of names (one per line) within 10 minutes."
@@ -310,13 +296,9 @@ After you set your credentials, send a MEGA link 🔗"""
                     # Build a confirmation message
                     top_message_names = f"Successfully processed {len(names_list)} names:\n\n"
                     formatted_names = "\n".join(f"{i+1}. <code>{name}</code>" for i, name in enumerate(names_list))
-                    final_message_names = top_message_names + formatted_names
 
-                    max_length = 4096
-                    if len(final_message_names) > max_length:
-                        final_message_names = final_message_names[:max_length - 30] + "\n<code>...truncated...</code>"
-
-                    await call.message.reply_text(final_message_names)
+                    # Use the utility function to send long messages in chunks
+                    await send_long_message(call, formatted_names, header=top_message_names)
 
                     # At the end of the names file processing block, send the final confirmation message:
                     final_confirmation_message = (
@@ -368,6 +350,7 @@ After you set your credentials, send a MEGA link 🔗"""
             fail_output = ""
             
             successful_folders = {}
+            pending_chunks = {}  # Track chunks that need to be combined into leakutopia links
 
             for folder, log in watermarking_log.items():
 
@@ -378,11 +361,46 @@ After you set your credentials, send a MEGA link 🔗"""
                     error_msg = log.get("error", "Unknown error")
                     fail_output += f"{name}\n{link}\n<i>({error_msg})</i>\n\n"
                 else:
-                    if name not in successful_folders:
-                        successful_folders[name] = []
-                    # Only add the link if it's not already in the list (deduplicate leakutopia links)
-                    if link not in successful_folders[name]:
-                        successful_folders[name].append(link)
+                    # Check if this is a chunk that needs to be combined into a leakutopia link
+                    if log.get("pending_leakutopia") and log.get("original_folder"):
+                        original_folder = log.get("original_folder")
+                        if original_folder not in pending_chunks:
+                            pending_chunks[original_folder] = {
+                                "model_name": name,
+                                "chunks": []
+                            }
+                        pending_chunks[original_folder]["chunks"].append(link)
+                    else:
+                        # Regular folder (not a pending chunk)
+                        if name not in successful_folders:
+                            successful_folders[name] = []
+                        # Only add the link if it's not already in the list (deduplicate leakutopia links)
+                        if link not in successful_folders[name]:
+                            successful_folders[name].append(link)
+
+            # Process pending chunks and create leakutopia.click links
+            from bot_management.leakutopia_links import newPaste
+            
+            for original_folder, chunk_data in pending_chunks.items():
+                model_name = chunk_data["model_name"]
+                chunk_links = chunk_data["chunks"]
+                
+                # Create leakutopia.click content with all chunk links
+                content = ""
+                for link in chunk_links:
+                    content += f"{link}\n"
+                
+                # Create the leakutopia.click link
+                new_leak_link = newPaste(content.strip())
+                
+                # Add to successful folders
+                if model_name not in successful_folders:
+                    successful_folders[model_name] = []
+                successful_folders[model_name].append(new_leak_link)
+                
+                await call.message.reply_text(
+                    f"✅ Combined {len(chunk_links)} chunks into leakutopia.click link: {new_leak_link}"
+                )
 
             for name, links in successful_folders.items():
                 success_output += f"{name}\n"
@@ -394,35 +412,26 @@ After you set your credentials, send a MEGA link 🔗"""
             for folder, size in unallocated_folders:
                 fail_output += f"{folder}\n<i>(Unallocated due to insufficient capacity)</i>\n\n"
 
-            # Trim each message if needed
-            def chunk_text(text, chunk_size=3000):
-                """Yield successive chunk_size pieces from text."""
-                for i in range(0, len(text), chunk_size):
-                    yield text[i:i+chunk_size]
-
-            async def send_long_message(message_text, header=""):
-                """Send a long message in 3000-character chunks, prepending a header to the first chunk."""
-                full_text = header + message_text
-                chunks = list(chunk_text(full_text, 3000))
-                # Send the first chunk (with header)
-                await call.message.reply_text(chunks[0])
-                # Send any additional chunks without header
-                for chunk in chunks[1:]:
-                    await call.message.reply_text(chunk)
+            # Use the utility function for sending long messages
 
             # Use the helper for successful output:
             if success_output:
-                await send_long_message(success_output, header="✅ Successful folders:\n\n")
+                await send_long_message(call, success_output, header="✅ Successful folders:\n\n")
 
             # Use the helper for failed output:
             if fail_output:
-                await send_long_message(fail_output, header="❌ Failed folders:\n\n")
+                await send_long_message(call, fail_output, header="❌ Failed folders:\n\n")
 
             unused_accounts = []
             low_usage_accounts = []
 
             for account, allocations in account_allocations.items():
-                total_used = sum((size if size is not None else 0) for (_, size) in allocations)
+                total_used = 0
+                for allocation in allocations:
+                    if len(allocation) >= 2:
+                        size = allocation[1]  # Second element is always the size
+                        total_used += (size if size is not None else 0)
+                
                 if total_used == 0:
                     unused_accounts.append(account)
                 elif total_used < 10:
@@ -438,9 +447,9 @@ After you set your credentials, send a MEGA link 🔗"""
             # For account usage summary:
             if msg_parts:
                 summary_text = "\n\n".join(msg_parts)
-                await send_long_message(summary_text, header="📭 Account Usage Summary:\n\n")
+                await send_long_message(call, summary_text, header="📭 Account Usage Summary:\n\n")
 
-            # Create a ZIP archive of the process folder
+            # Create a ZIP archive of the process folder (for local use, not sent via Telegram)
             zip_path = process_folder + ".zip"
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for root, dirs, files in os.walk(process_folder):
@@ -450,7 +459,11 @@ After you set your credentials, send a MEGA link 🔗"""
                         arcname = os.path.relpath(file_path, start=process_folder)
                         zipf.write(file_path, arcname)
 
-            await call.message.reply_document(document=zip_path, caption="📦 Here is the zipped process folder.")
+            # Clean up processed content files
+            from bot_management.utils import cleanup_processed_content_files
+            deleted_count = cleanup_processed_content_files()
+            if deleted_count > 0:
+                await call.message.reply_text(f"🧹 Cleaned up {deleted_count} processed content file(s)")
 
         except Exception as e:
             await call.message.reply_text(f"An error occurred during bulk processing: {e}")
@@ -668,11 +681,11 @@ Press <i>☑️ Confirm</i> to continue"""
                     new_leak_link = newPaste(content.strip())
                     await call.message.reply(f"✅ <b>New LeakUtopia.click link with {len(successful_mega_links)} chunks:</b> {new_leak_link}")
                 
-                # Send results
+                # Send results using chunking
                 if success_output:
-                    await call.message.reply_text(f"✅ <b>Successful processing:</b>\n\n{success_output}")
+                    await send_long_message(call, success_output, header="✅ <b>Successful processing:</b>\n\n")
                 if fail_output:
-                    await call.message.reply_text(f"❌ <b>Failed processing:</b>\n\n{fail_output}")
+                    await send_long_message(call, fail_output, header="❌ <b>Failed processing:</b>\n\n")
                 
                 # Clean up processed content files
                 from bot_management.utils import cleanup_processed_content_files
