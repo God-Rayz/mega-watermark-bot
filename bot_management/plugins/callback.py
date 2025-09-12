@@ -425,13 +425,23 @@ After you set your credentials, send a MEGA link 🔗"""
             unused_accounts = []
             low_usage_accounts = []
 
-            for account, allocations in account_allocations.items():
-                total_used = 0
-                for allocation in allocations:
-                    if len(allocation) >= 2:
-                        size = allocation[1]  # Second element is always the size
-                        total_used += (size if size is not None else 0)
-                
+            # Track actual account usage from successful imports in watermarking_log
+            account_actual_usage = {}
+            
+            # Initialize all accounts with 0 usage
+            for account in account_allocations.keys():
+                account_actual_usage[account] = 0
+            
+            # Calculate actual usage from successful imports
+            for folder, log in watermarking_log.items():
+                if log.get("status") == "success" and "account" in log and "size" in log:
+                    account = log["account"]
+                    size = log["size"]
+                    if account in account_actual_usage and size is not None:
+                        account_actual_usage[account] += size
+
+            # Categorize accounts based on actual usage
+            for account, total_used in account_actual_usage.items():
                 if total_used == 0:
                     unused_accounts.append(account)
                 elif total_used < 10:
